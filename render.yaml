@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: code-analysis-backend
+    rootDir: BACKEND/ai-doc-gen
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+  - type: static
+    name: code-analysis-frontend
+    rootDir: FRONTEND/code_analysis
+    buildCommand: npm install && npm run build
+    publishDir: dist
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: code-analysis-backend
+          property: url

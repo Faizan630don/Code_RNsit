@@ -9,6 +9,10 @@ import ReactFlow, {
   ReactFlowProvider,
   Position,
   ConnectionLineType,
+  BaseEdge,
+  EdgeLabelRenderer,
+  getSmoothStepPath,
+  type EdgeProps,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import dagre from 'dagre';
@@ -101,6 +105,29 @@ const nodeTypes = {
   process: ProcessNode,
 };
 
+const GlowingSmoothEdge = (props: EdgeProps) => {
+  const { sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, markerEnd, label } = props;
+  const [edgePath, labelX, labelY] = getSmoothStepPath({ sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition });
+  const stroke = (props.style?.stroke as string) || 'rgba(56, 189, 248, 0.9)';
+  const style = {
+    stroke,
+    strokeWidth: (props.style?.strokeWidth as number) || 3,
+    filter: `drop-shadow(0 0 6px ${stroke}) drop-shadow(0 0 12px ${stroke}) drop-shadow(0 0 18px ${stroke})`,
+  } as React.CSSProperties;
+  return (
+    <>
+      <BaseEdge id={props.id} path={edgePath} style={style} markerEnd={markerEnd} />
+      {label && (
+        <EdgeLabelRenderer>
+          <div style={{ position: 'absolute', transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`, background: 'rgba(15,23,42,0.8)', color: '#94a3b8', padding: '4px 8px', borderRadius: 8, border: '1px solid rgba(148,163,184,0.4)', fontWeight: 700, fontSize: 12 }}>
+            {label}
+          </div>
+        </EdgeLabelRenderer>
+      )}
+    </>
+  );
+};
+
 function classifyVariant(label: string): { variant: 'base' | 'recursive' | 'default'; tooltip?: string } {
   const lower = (label || '').toLowerCase();
   if (lower.includes('return n') || lower.includes('base')) {
@@ -167,13 +194,32 @@ function getLayoutedElements(flowchart: Flowchart) {
       source: edge.from_node,
       target: edge.to_node,
       label: edge.label || '',
-      type: 'smoothstep',
+      type: 'glowingSmooth',
       markerEnd: { type: MarkerType.ArrowClosed, color: stroke, width: 18, height: 18 },
       style: { stroke, strokeWidth: 3, strokeLinejoin: 'round', strokeLinecap: 'round' },
       labelStyle: { fill: '#94a3b8', fontWeight: 700, fontSize: '12px', backgroundColor: 'rgba(15, 23, 42, 0.8)', padding: '4px 8px', borderRadius: '8px', border: '1px solid rgba(148, 163, 184, 0.4)' },
       animated: true,
     } as Edge;
   });
+
+  // Fallback connectivity to attach every node to previous
+  const originalIds = flowchart.nodes.map((n) => n.id);
+  for (let i = 0; i < originalIds.length - 1; i++) {
+    const a = originalIds[i];
+    const b = originalIds[i + 1];
+    const exists = edges.some((e) => e.source === a && e.target === b);
+    if (!exists) {
+      edges.push({
+        id: `${a}-fallback-${b}`,
+        source: a,
+        target: b,
+        type: 'glowingSmooth',
+        markerEnd: { type: MarkerType.ArrowClosed, color: 'rgba(56,189,248,0.9)', width: 16, height: 16 },
+        style: { stroke: 'rgba(56,189,248,0.9)', strokeWidth: 2 },
+        animated: true,
+      } as Edge);
+    }
+  }
 
   // Augment recursion: split recursive return into two sub-calls
   const recursiveNodes = nodes.filter((n) => n.type === 'process' && n.data?.variant === 'recursive');
@@ -325,6 +371,7 @@ export default function FlowchartVisualizer({ flowchart, explanation }: Flowchar
             nodes={nodes}
             edges={edges}
             nodeTypes={nodeTypes}
+            edgeTypes={{ glowingSmooth: GlowingSmoothEdge }}
             fitView
             fitViewOptions={{ padding: 0.3, maxZoom: 2, minZoom: 0.5 }}
             className="bg-transparent"

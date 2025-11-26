@@ -152,6 +152,7 @@ export default function App() {
           setFlowchartData(mockFlowchartResponse);
         } else {
           toast.error(`Flowchart: ${errorDetail || 'Failed to get flowchart data'}`);
+          setFlowchartData(mockFlowchartResponse);
         }
       }
 
@@ -680,4 +681,3 @@ export default function App() {
     </div>
   );
 }
-
