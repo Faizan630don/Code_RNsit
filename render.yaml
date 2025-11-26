@@ -1,18 +1,23 @@
 services:
-  - type: web
-    name: code-analysis-backend
-    rootDir: BACKEND/ai-doc-gen
-    runtime: python
+  - name: code-analysis-backend
+    type: web
+    env: python
+    rootDirectory: BACKEND/ai-doc-gen
+    plan: free
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
-  - type: static_site
-    name: code-analysis-frontend
-    rootDir: FRONTEND/code_analysis
+    autoDeploy: true
+    envVars:
+      - key: GROQ_API_KEY
+        sync: false
+      - key: CORS_ALLOW_ORIGINS
+        value: https://code-analysis-frontend.onrender.com,https://code-analysis-frontend.onrender.com/*
+
+  - name: code-analysis-frontend
+    type: static
+    rootDirectory: FRONTEND/code_analysis
     buildCommand: npm install && npm run build
-    publishDir: dist
+    staticPublishPath: dist
     envVars:
       - key: VITE_API_URL
-        fromService:
-          type: web
-          name: code-analysis-backend
-          property: url
+        value: https://code-analysis-backend.onrender.com
