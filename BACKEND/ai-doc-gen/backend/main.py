@@ -36,12 +36,20 @@ async def ping():
 async def explain_code(req: ExplainRequest):
     try:
         explanation = groq_generate_explanation(req.code, req.language)
-        # Check if explanation contains an error
-        if explanation.startswith("Error:") or "invalid_api_key" in explanation.lower() or "GROQ_API_KEY" in explanation:
-            raise HTTPException(status_code=503, detail=explanation)
+        fallback = False
+        # If explanation failed due to missing/invalid API key, continue with AST flowchart and a fallback message
+        if isinstance(explanation, str) and (
+            explanation.startswith("Error:") or
+            "invalid_api_key" in explanation.lower() or
+            "GROQ_API_KEY" in explanation
+        ):
+            fallback = True
         flowchart = build_flowchart(req.code)
         return {
-            "explanation": explanation,
+            "explanation": (
+                "Explanation unavailable due to API key configuration. Flowchart derived from AST analysis."
+                if fallback else explanation
+            ),
             "flowchart": flowchart
         }
     except HTTPException:
@@ -53,9 +61,13 @@ async def explain_code(req: ExplainRequest):
 async def generate_docstring(req: DocstringRequest):
     try:
         docstring_text = groq_generate_docstring(req.code, req.style)
-        # Check if docstring contains an error
-        if docstring_text.startswith("Error:") or "invalid_api_key" in docstring_text.lower() or "GROQ_API_KEY" in docstring_text:
-            raise HTTPException(status_code=503, detail=docstring_text)
+        # Graceful fallback for API key issues
+        if isinstance(docstring_text, str) and (
+            docstring_text.startswith("Error:") or
+            "invalid_api_key" in docstring_text.lower() or
+            "GROQ_API_KEY" in docstring_text
+        ):
+            docstring_text = "Documentation unavailable due to API key configuration."
         return {"docstring": docstring_text}
     except HTTPException:
         raise
@@ -66,16 +78,18 @@ async def generate_docstring(req: DocstringRequest):
 async def refactor_code(req: RefactorRequest):
     try:
         analysis_result = groq_refactor_code(req.code)
-        
-        # Check if result contains an error
+
+        # If Groq returns an error (e.g., API key), provide a graceful fallback
         if isinstance(analysis_result, dict) and analysis_result.get("error"):
-            error_type = analysis_result.get("error_type", "unknown")
-            if error_type in ["invalid_api_key", "missing_api_key"]:
-                raise HTTPException(status_code=503, detail=analysis_result.get("error", "API key error"))
-        
+            analysis_result = {
+                "language_detected": "unknown",
+                "issues": [],
+                "refactored_code": req.code,
+            }
+
         return {
             "original_code": req.code,
-            "refactored_code": analysis_result.get("refactored_code", ""),
+            "refactored_code": analysis_result.get("refactored_code", req.code),
             "issues": analysis_result.get("issues", []),
             "language_detected": analysis_result.get("language_detected", "unknown")
         }
@@ -91,14 +105,19 @@ async def analyze_complexity(req: ComplexityRequest):
     """
     try:
         result = groq_analyze_complexity(req.code)
-        
-        # Check if result contains an error
+
+        # Graceful fallback for API key issues
         if isinstance(result, dict) and result.get("error"):
-            error_type = result.get("error_type", "unknown")
-            if error_type in ["invalid_api_key", "missing_api_key"]:
-                raise HTTPException(status_code=503, detail=result.get("error", "API key error"))
-        
-        # Ensure keys exist (basic error handling)
+            result = {
+                "time_complexity": "Unknown",
+                "space_complexity": "Unknown",
+                "time_explanation": "Complexity analysis unavailable due to API key configuration.",
+                "space_explanation": "Complexity analysis unavailable due to API key configuration.",
+                "time_data": [],
+                "space_data": [],
+            }
+
+        # Ensure keys exist
         return {
             "time_complexity": result.get("time_complexity", "Unknown"),
             "space_complexity": result.get("space_complexity", "Unknown"),

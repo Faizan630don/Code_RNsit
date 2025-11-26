@@ -48,49 +48,89 @@ export const mockComplexityResponse: ComplexityResponse = {
 };
 
 export const mockRefactorResponse: RefactorResponse = {
-  original_code: `function calculateFibonacci(n) {
-  if (n <= 1) {
-    return n;
-  }
-  return calculateFibonacci(n - 1) + calculateFibonacci(n - 2);
+  original_code: `#include <stdio.h>
+
+int main() {
+    char op;
+    int a, b;
+
+    printf("Enter operator (+, -, *, /): ");
+    scanf("%c", &op);
+
+    printf("Enter two numbers: ");
+    scanf("%d %d", &a, &b);
+
+    switch(op) {
+        case '+': printf("Result = %d\n", a + b); break;
+        case '-': printf("Result = %d\n", a - b); break;
+        case '*': printf("Result = %d\n", a * b); break;
+        case '/': printf("Result = %d\n", a / b); break;
+        default: printf("Invalid operator!\n");
+    }
+
+    return 0;
 }`,
-  refactored_code: `const calculateFibonacci = (() => {
-  const cache = { 0: 0, 1: 1 };
-  return function fib(n) {
-    if (cache[n] !== undefined) return cache[n];
-    cache[n] = fib(n - 1) + fib(n - 2);
-    return cache[n];
-  };
-})();`,
+  refactored_code: `#include <stdio.h>
+
+int main(void) {
+    char op = 0;
+    int a = 0, b = 0;
+
+    printf("Enter operator (+, -, *, /): ");
+    if (scanf(" %c", &op) != 1) {
+        printf("Input error: operator.\n");
+        return 1;
+    }
+
+    printf("Enter two integers: ");
+    if (scanf("%d %d", &a, &b) != 2) {
+        printf("Input error: numbers.\n");
+        return 1;
+    }
+
+    switch (op) {
+        case '+':
+            printf("Result = %d\n", a + b);
+            break;
+        case '-':
+            printf("Result = %d\n", a - b);
+            break;
+        case '*':
+            printf("Result = %d\n", a * b);
+            break;
+        case '/':
+            if (b == 0) {
+                printf("Error: division by zero.\n");
+                return 1;
+            }
+            printf("Result = %d\n", a / b);
+            break;
+        default:
+            printf("Invalid operator!\n");
+            return 1;
+    }
+
+    return 0;
+}`,
   issues: [
-    {
-      type: 'Performance Issue',
-      description: 'Recursive implementation without memoization causes exponential time complexity',
-      severity: 'High',
-    },
-    {
-      type: 'Code Smell',
-      description: 'Function can be optimized using memoization pattern',
-      severity: 'Medium',
-    },
+    { type: 'Code Smell', description: 'Missing input validation for scanf return values', severity: 'Medium' },
+    { type: 'Security Vulnerability', description: 'Division by zero not handled', severity: 'High' },
   ],
-  language_detected: 'javascript',
+  language_detected: 'c',
 };
 
 export const mockDocstringResponse: DocstringResponse = {
   docstring: `/**
- * Calculates the nth Fibonacci number using memoization.
- * 
- * @param {number} n - The position in the Fibonacci sequence (non-negative integer)
- * @returns {number} The nth Fibonacci number
- * 
- * @example
- * calculateFibonacci(10) // Returns 55
- * calculateFibonacci(0) // Returns 0
- * 
- * @complexity
- * Time: O(n) - Linear time due to memoization
- * Space: O(n) - Linear space for cache storage
+ * @file calculator.c
+ * @brief Simple integer calculator using a switch statement.
+ *
+ * Reads an operator and two integers from standard input and prints the
+ * computed result. Supports addition, subtraction, multiplication, and
+ * division with a division-by-zero guard.
+ *
+ * @details Input is validated via scanf return values. Division by zero
+ * returns an error code and prints a diagnostic message.
+ *
+ * @return int Exit status: 0 on success, non-zero on input or operation error.
  */`,
 };
-
