@@ -1,6 +1,7 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { Toaster, toast } from 'react-hot-toast';
 import { Workflow, BarChart3, Code2, FileText, Loader2, History as HistoryIcon, Sparkles, Activity, ShieldCheck } from 'lucide-react';
+import html2canvas from 'html2canvas';
 import CodeInput from './components/CodeInput';
 import FlowchartVisualizer from './components/FlowchartVisualizer';
 import ComplexityChart from './components/ComplexityChart';
@@ -55,6 +56,9 @@ export default function App() {
   const [refactorData, setRefactorData] = useState<RefactorResponse | null>(null);
   const [docstringData, setDocstringData] = useState<DocstringResponse | null>(null);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const flowchartCaptureRef = useRef<HTMLDivElement | null>(null);
+  const complexityCaptureRef = useRef<HTMLDivElement | null>(null);
+  const [isExporting, setIsExporting] = useState(false);
 
   // Check backend connection on mount and periodically
   useEffect(() => {
@@ -297,6 +301,99 @@ export default function App() {
   const tileGlow =
     'rounded-2xl border border-white/10 bg-slate-950/60 transition-all duration-300 shadow-[0_20px_50px_rgba(7,89,133,0.3)] hover:shadow-[0_55px_130px_rgba(6,182,212,0.45)] hover:border-cyan-300/80 hover:ring-2 hover:ring-cyan-400/70';
 
+  const captureSectionImage = useCallback(async (ref: React.RefObject<HTMLDivElement>) => {
+    if (!ref.current) return null;
+    try {
+      const canvas = await html2canvas(ref.current, {
+        backgroundColor: '#020617',
+        scale: 2,
+        logging: false,
+        useCORS: true,
+      });
+      return canvas.toDataURL('image/png');
+    } catch (error) {
+      console.error('Section capture failed', error);
+      return null;
+    }
+  }, []);
+
+  const handleDownloadReport = useCallback(async () => {
+    if (!flowchartData && !complexityData && !refactorData && !docstringData) {
+      toast.error('Run an analysis first to generate a report.');
+      return;
+    }
+    setIsExporting(true);
+    try {
+      const [flowchartImage, complexityImage] = await Promise.all([
+        captureSectionImage(flowchartCaptureRef),
+        captureSectionImage(complexityCaptureRef),
+      ]);
+
+      const lines: string[] = [];
+      lines.push(`# AI Code Analyzer Report`);
+      lines.push(`Generated: ${new Date().toLocaleString()}`);
+      lines.push(`Lines evaluated: ${code.split('\n').length}`);
+      lines.push(`Backend status: ${backendConnected ? 'Connected' : 'Demo/Fallback'}`);
+
+      lines.push(`\n## Flow & Explanation`);
+      if (flowchartImage) {
+        lines.push(`![Flowchart](${flowchartImage})`);
+      }
+      lines.push(flowchartData?.explanation || 'No flow explanation available.');
+
+      lines.push(`\n## Complexity Analysis`);
+      if (complexityImage) {
+        lines.push(`![Complexity Graph](${complexityImage})`);
+      }
+      if (complexityData) {
+        lines.push(`- Time Complexity: ${complexityData.time_complexity}`);
+        lines.push(`- Space Complexity: ${complexityData.space_complexity}`);
+        lines.push(`- Time Notes: ${complexityData.time_explanation}`);
+        lines.push(`- Space Notes: ${complexityData.space_explanation}`);
+      } else {
+        lines.push('No complexity data available.');
+      }
+
+      lines.push(`\n## Refactor Suggestions`);
+      if (refactorData) {
+        const issues = Array.isArray(refactorData.issues) ? refactorData.issues : [];
+        if (issues.length) {
+          lines.push('### Issues');
+          issues.forEach((issue, index) => {
+            lines.push(`${index + 1}. [${issue.severity}] ${issue.type} - ${issue.description}`);
+          });
+        } else {
+          lines.push('No issues detected.');
+        }
+        lines.push('\n### Refactored Code');
+        lines.push('```');
+        lines.push(refactorData.refactored_code || 'No refactored code available.');
+        lines.push('```');
+      } else {
+        lines.push('No refactor insights available.');
+      }
+
+      lines.push(`\n## Documentation`);
+      lines.push(docstringData?.docstring || 'Docstring has not been generated.');
+
+      const blob = new Blob([lines.join('\n\n')], { type: 'text/markdown;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `ai-code-report-${Date.now()}.md`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      toast.success('Report download started.');
+    } catch (error) {
+      console.error('Report export failed', error);
+      toast.error('Failed to build report. Please try again.');
+    } finally {
+      setIsExporting(false);
+    }
+  }, [backendConnected, captureSectionImage, code, complexityData, docstringData, flowchartData, refactorData]);
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
       <Toaster
@@ -473,7 +570,20 @@ export default function App() {
                           </div>
                         )}
                         {activeTab === 'docs' && (
-                          <div className={`${tileGlow} p-4`}>
+                          <div className={`${tileGlow} p-4 flex flex-col gap-4`}>
+                            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-3">
+                              <div>
+                                <h4 className="text-white font-semibold">Documentation</h4>
+                                <p className="text-xs text-slate-400">Latest AI-generated docstring</p>
+                              </div>
+                              <button
+                                onClick={handleDownloadReport}
+                                disabled={isExporting}
+                                className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-cyan-400 via-sky-500 to-blue-500 px-4 py-2 text-sm font-semibold text-slate-900 shadow-[0_10px_30px_rgba(6,182,212,0.5)] transition disabled:opacity-60 disabled:cursor-not-allowed"
+                              >
+                                {isExporting ? 'Preparing…' : 'Download Report'}
+                              </button>
+                            </div>
                             <DocstringPanel docstring={docstringData} />
                           </div>
                         )}
@@ -548,6 +658,22 @@ export default function App() {
                 </div>
               </div>
             </section>
+          </div>
+        </div>
+        <div className="pointer-events-none absolute -left-[9999px] top-0 h-0 overflow-hidden" aria-hidden="true">
+          <div ref={flowchartCaptureRef} className="w-[900px] bg-slate-950 p-6 rounded-3xl">
+            {flowchartData ? (
+              <FlowchartVisualizer flowchart={flowchartData?.flowchart || null} explanation={flowchartData?.explanation || ''} />
+            ) : (
+              <p className="text-slate-500 text-sm">Flowchart not available.</p>
+            )}
+          </div>
+          <div ref={complexityCaptureRef} className="w-[900px] bg-slate-950 p-6 rounded-3xl mt-6">
+            {complexityData ? (
+              <ComplexityChart complexity={complexityData} />
+            ) : (
+              <p className="text-slate-500 text-sm">Complexity data not available.</p>
+            )}
           </div>
         </div>
       </div>
