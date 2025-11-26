@@ -5,7 +5,7 @@ services:
     runtime: python
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
-  - type: static
+  - type: static_site
     name: code-analysis-frontend
     rootDir: FRONTEND/code_analysis
     buildCommand: npm install && npm run build
