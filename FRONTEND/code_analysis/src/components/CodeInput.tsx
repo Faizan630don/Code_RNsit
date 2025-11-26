@@ -24,14 +24,17 @@ export default function CodeInput({ code, onCodeChange, onAnalyze, isLoading }: 
   };
 
   return (
-    <div className="relative h-full flex flex-col bg-slate-900 border-r border-cyan-500/20">
+    <div className="relative h-full flex flex-col rounded-3xl bg-white/5 border border-white/10 backdrop-blur-2xl shadow-[0_25px_70px_rgba(6,182,212,0.25)] transition-all duration-300 hover:border-cyan-400/80 hover:ring-2 hover:ring-cyan-400/60 hover:shadow-[0_75px_170px_rgba(6,182,212,0.6)] overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 bg-slate-800/50 border-b border-cyan-500/20">
-        <h2 className="text-lg font-semibold text-cyan-400">Code Editor</h2>
+      <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-white/10 bg-white/5">
+        <div>
+          <p className="text-xs uppercase tracking-[0.3em] text-cyan-300">Input</p>
+          <h2 className="text-xl font-semibold text-white">Code Workspace</h2>
+        </div>
         <button
           onClick={handleAnalyze}
           disabled={isLoading}
-          className="flex items-center gap-2 px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50"
+          className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-cyan-400 via-sky-500 to-blue-500 px-5 py-2 font-semibold text-slate-900 shadow-[0_8px_24px_rgba(6,182,212,0.45)] transition-all hover:shadow-[0_20px_45px_rgba(6,182,212,0.55)] disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isLoading ? (
             <>
@@ -41,7 +44,7 @@ export default function CodeInput({ code, onCodeChange, onAnalyze, isLoading }: 
           ) : (
             <>
               <Play className="w-4 h-4" />
-              Analyze
+              Run Analysis
             </>
           )}
         </button>
@@ -73,13 +76,9 @@ export default function CodeInput({ code, onCodeChange, onAnalyze, isLoading }: 
         <button
           onClick={handleAnalyze}
           disabled={isLoading}
-          className="w-14 h-14 rounded-full bg-cyan-500 hover:bg-cyan-400 text-slate-900 shadow-lg shadow-cyan-500/50 flex items-center justify-center transition-all duration-200 disabled:opacity-50"
+          className="w-14 h-14 rounded-3xl bg-gradient-to-br from-cyan-400 to-blue-500 text-slate-900 shadow-[0_20px_45px_rgba(6,182,212,0.55)] flex items-center justify-center transition-all disabled:opacity-60"
         >
-          {isLoading ? (
-            <Loader2 className="w-6 h-6 animate-spin" />
-          ) : (
-            <Play className="w-6 h-6 ml-1" />
-          )}
+          {isLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : <Play className="w-6 h-6 ml-1" />}
         </button>
       </div>
     </div>

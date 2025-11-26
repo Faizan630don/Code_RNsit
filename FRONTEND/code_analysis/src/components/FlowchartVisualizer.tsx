@@ -38,178 +38,58 @@ const formatLabel = (label: string) => {
   return lines.join('\n');
 };
 
-// Custom Diamond Node for decisions - Beautiful neon design
-const DiamondNode = ({ data }: { data: { label: string; complexity_score: number } }) => {
-  const isHighComplexity = data.complexity_score > 5;
-  const borderColor = isHighComplexity ? '#f87171' : '#22d3ee';
-  const glowColor = isHighComplexity ? 'rgba(248, 113, 113, 0.8)' : 'rgba(34, 211, 238, 0.8)';
-  const bgGradient =
-    'linear-gradient(135deg, rgba(30, 41, 59, 0.98), rgba(30, 41, 59, 0.9))';
-  const size = 130;
-
+// Decision Node (Blue) with rounded shape and light shadow
+const DiamondNode = ({ data }: { data: { label: string; complexity_score: number; tooltip?: string } }) => {
+  const size = 120;
+  const borderColor = '#3b82f6';
+  const bgGradient = 'linear-gradient(135deg, #0b1220, #0e1726)';
   return (
-    <div
-      style={{
-        width: size,
-        height: size,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        position: 'relative',
-        filter: `drop-shadow(0 0 12px ${glowColor}) drop-shadow(0 0 20px ${glowColor}) drop-shadow(0 0 30px ${glowColor})`,
-      }}
-    >
+    <div title={data.tooltip || 'Checks if recursion should stop'} style={{ width: size, height: size, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
       <div
         style={{
           width: size,
           height: size,
           background: bgGradient,
-          border: `4px solid ${borderColor}`,
+          border: `2px solid ${borderColor}`,
           transform: 'rotate(45deg)',
           position: 'absolute',
-          boxShadow: `
-            0 0 25px ${glowColor},
-            0 0 40px ${glowColor},
-            inset 0 0 15px ${glowColor},
-            inset 0 0 25px rgba(255, 255, 255, 0.1)
-          `,
-          borderRadius: '8px',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.25)',
+          borderRadius: '12px',
         }}
       />
-      <div
-        style={{
-          transform: 'rotate(-45deg)',
-          color: '#f1f5f9',
-          fontSize: '12px',
-          fontWeight: '700',
-          textAlign: 'center',
-          padding: '12px',
-          position: 'relative',
-          zIndex: 1,
-          maxWidth: size,
-          wordBreak: 'break-word',
-          textShadow: `0 0 12px ${glowColor}, 0 0 20px ${glowColor}`,
-          lineHeight: '1.4',
-        }}
-      >
+      <div style={{ transform: 'rotate(-45deg)', color: '#e2e8f0', fontSize: '12px', fontWeight: 700, textAlign: 'center', padding: '10px', position: 'relative', zIndex: 1, maxWidth: size, wordBreak: 'break-word', lineHeight: '1.4' }}>
         {formatLabel(data.label)}
       </div>
     </div>
   );
 };
 
-// Custom Start/End Node - Stunning neon design
-const TerminalNode = ({ data }: { data: { label: string; type: string } }) => {
-  const isStart = data.type === 'start';
-  const bgGradient = isStart 
-    ? 'linear-gradient(135deg, #a855f7, #7c3aed, #6d28d9)'
-    : 'linear-gradient(135deg, #f87171, #ef4444, #dc2626)';
-  const glowColor = isStart ? 'rgba(168, 85, 247, 0.9)' : 'rgba(248, 113, 113, 0.9)';
-  const borderColor = isStart ? '#9333ea' : '#f87171';
-  
+// Start/End Node (Green) rounded with light shadow
+const TerminalNode = ({ data }: { data: { label: string; type: string; tooltip?: string } }) => {
+  const bgGradient = 'linear-gradient(135deg, #22c55e, #16a34a)';
   return (
-    <div
-      className="terminal-node"
-      style={{
-        padding: '16px 28px',
-        background: bgGradient,
-        color: '#ffffff',
-        borderRadius: '28px',
-        fontWeight: '800',
-        fontSize: '15px',
-        letterSpacing: '0.5px',
-        border: `3px solid ${borderColor}`,
-        boxShadow: `
-          0 0 25px ${glowColor},
-          0 0 40px ${glowColor},
-          0 0 60px ${glowColor},
-          inset 0 0 20px rgba(255, 255, 255, 0.15),
-          inset 0 2px 4px rgba(255, 255, 255, 0.2)
-        `,
-        textShadow: `
-          0 0 10px rgba(0, 0, 0, 0.8),
-          0 2px 4px rgba(0, 0, 0, 0.5),
-          0 0 20px ${glowColor}
-        `,
-        filter: `drop-shadow(0 0 12px ${glowColor}) drop-shadow(0 0 20px ${glowColor})`,
-        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-        position: 'relative',
-        overflow: 'hidden',
-      }}
-    >
-      <div
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: '-100%',
-          width: '100%',
-          height: '100%',
-          background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent)',
-          transition: 'left 0.5s ease',
-        }}
-        className="shimmer-effect"
-      />
+    <div title={data.tooltip || (data.type === 'start' ? 'Start of flow' : 'End of flow')} style={{ padding: '14px 24px', background: bgGradient, color: '#052e12', borderRadius: 24, fontWeight: 800, fontSize: 14, letterSpacing: '0.3px', border: '2px solid #16a34a', boxShadow: '0 6px 14px rgba(0,0,0,0.25)' }}>
       {formatLabel(data.label)}
     </div>
   );
 };
 
-// Custom Process Node - Beautiful neon design with complexity-based colors
-const ProcessNode = ({ data }: { data: { label: string; complexity_score: number } }) => {
-  const isHighComplexity = data.complexity_score > 5;
-  const isMediumComplexity = data.complexity_score > 3;
-  
-  // Enhanced color scheme: Red for high, Purple for medium, Cyan for low
-  let borderColor, glowColor, bgGradient, textColor;
-  if (isHighComplexity) {
-    borderColor = '#f87171';
-    glowColor = 'rgba(248, 113, 113, 0.8)';
-    bgGradient = 'linear-gradient(135deg, rgba(30, 41, 59, 0.98), rgba(30, 41, 59, 0.92))';
+// Process Node with variants and light styling
+const ProcessNode = ({ data }: { data: { label: string; complexity_score: number; variant?: 'base' | 'recursive' | 'default'; tooltip?: string } }) => {
+  let borderColor = '#64748b';
+  let bg = 'linear-gradient(135deg, #0b1220, #0e1726)';
+  let textColor = '#e2e8f0';
+  if (data.variant === 'base') {
+    borderColor = '#f59e0b';
+    bg = 'linear-gradient(135deg, #1f1b0a, #2a230b)';
+    textColor = '#fef3c7';
+  } else if (data.variant === 'recursive') {
+    borderColor = '#ef4444';
+    bg = 'linear-gradient(135deg, #1a0e0e, #220e0e)';
     textColor = '#fecaca';
-  } else if (isMediumComplexity) {
-    borderColor = '#a855f7';
-    glowColor = 'rgba(168, 85, 247, 0.8)';
-    bgGradient = 'linear-gradient(135deg, rgba(30, 41, 59, 0.98), rgba(30, 41, 59, 0.92))';
-    textColor = '#e9d5ff';
-  } else {
-    borderColor = '#22d3ee';
-    glowColor = 'rgba(34, 211, 238, 0.8)';
-    bgGradient = 'linear-gradient(135deg, rgba(30, 41, 59, 0.98), rgba(30, 41, 59, 0.92))';
-    textColor = '#cffafe';
   }
-
   return (
-    <div
-      className="process-node"
-      style={{
-        padding: '16px 24px',
-        background: bgGradient,
-        color: textColor,
-        borderRadius: '14px',
-        border: `3px solid ${borderColor}`,
-        fontWeight: '700',
-        fontSize: '14px',
-        letterSpacing: '0.3px',
-        minWidth: '140px',
-        textAlign: 'center',
-        boxShadow: `
-          0 0 20px ${glowColor},
-          0 0 35px ${glowColor},
-          0 0 50px ${glowColor},
-          inset 0 0 15px rgba(255, 255, 255, 0.08),
-          inset 0 2px 4px rgba(255, 255, 255, 0.1)
-        `,
-        textShadow: `
-          0 0 10px ${glowColor},
-          0 0 20px ${glowColor},
-          0 2px 4px rgba(0, 0, 0, 0.5)
-        `,
-        filter: `drop-shadow(0 0 8px ${glowColor}) drop-shadow(0 0 15px ${glowColor})`,
-        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-        position: 'relative',
-        lineHeight: '1.5',
-      }}
-    >
+    <div title={data.tooltip} style={{ padding: '12px 20px', background: bg, color: textColor, borderRadius: 12, border: `2px solid ${borderColor}`, fontWeight: 700, fontSize: 13, minWidth: 140, textAlign: 'center', boxShadow: '0 6px 14px rgba(0,0,0,0.25)', lineHeight: 1.5 }}>
       {formatLabel(data.label)}
     </div>
   );
@@ -221,12 +101,23 @@ const nodeTypes = {
   process: ProcessNode,
 };
 
+function classifyVariant(label: string): { variant: 'base' | 'recursive' | 'default'; tooltip?: string } {
+  const lower = (label || '').toLowerCase();
+  if (lower.includes('return n') || lower.includes('base')) {
+    return { variant: 'base', tooltip: 'Stops recursion and returns value' };
+  }
+  if (lower.includes('fib(') || (lower.includes('return') && (lower.includes('n-1') || lower.includes('n - 1') || lower.includes('n-2') || lower.includes('n - 2')))) {
+    return { variant: 'recursive', tooltip: 'Breaks the problem into subproblems' };
+  }
+  return { variant: 'default', tooltip: undefined };
+}
+
 function getLayoutedElements(flowchart: Flowchart) {
   const g = new dagre.graphlib.Graph();
   g.setDefaultEdgeLabel(() => ({}));
-  g.setGraph({ rankdir: 'TB', nodesep: 110, ranksep: 140, marginx: 80, marginy: 80 });
+  g.setGraph({ rankdir: 'TB', nodesep: 110, ranksep: 140, marginx: 80, marginy: 80, align: 'center' });
 
-  const nodes: Node[] = flowchart.nodes.map((node) => {
+  const initialNodes: Node[] = flowchart.nodes.map((node) => {
     let nodeType = 'process';
     if (node.type === 'decision') nodeType = 'diamond';
     if (node.type === 'start' || node.type === 'end') nodeType = 'terminal';
@@ -248,94 +139,150 @@ function getLayoutedElements(flowchart: Flowchart) {
       targetPosition = Position.Top;
     }
 
+    const variantInfo = nodeType === 'process' ? classifyVariant(node.label) : { variant: 'default', tooltip: node.type === 'decision' ? 'Checks if recursion should stop' : undefined };
     return {
       id: node.id,
       type: nodeType,
-      data: { label: node.label, type: node.type, complexity_score: node.complexity_score },
+      data: { label: node.label, type: node.type, complexity_score: node.complexity_score, variant: variantInfo.variant, tooltip: variantInfo.tooltip },
       position: { x: 0, y: 0 },
       sourcePosition,
       targetPosition,
     };
   });
 
-  const edges: Edge[] = flowchart.edges.map((edge) => ({
-    id: `${edge.from_node}-${edge.to_node}`,
-    source: edge.from_node,
-    target: edge.to_node,
-    label: edge.label || '',
-    type: 'step',
-    markerEnd: { 
-      type: MarkerType.ArrowClosed,
-      color: '#22d3ee',
-      width: 24,
-      height: 24,
-      },
-    style: { 
-      stroke: 'rgba(34, 211, 238, 0.95)',
-      strokeWidth: 5,
-      strokeLinejoin: 'round',
-      strokeLinecap: 'round',
-      filter: `
-        drop-shadow(0 0 6px rgba(34, 211, 238, 1))
-        drop-shadow(0 0 12px rgba(34, 211, 238, 0.8))
-        drop-shadow(0 0 18px rgba(34, 211, 238, 0.6))
-      `,
-    },
-    labelStyle: { 
-      fill: '#22d3ee', 
-      fontWeight: 800,
-      fontSize: '13px',
-      textShadow: `
-        0 0 10px rgba(34, 211, 238, 1),
-        0 0 20px rgba(34, 211, 238, 0.8)
-      `,
-      backgroundColor: 'rgba(15, 23, 42, 0.95)',
-      padding: '6px 12px',
-      borderRadius: '8px',
-      border: '2px solid rgba(34, 211, 238, 0.6)',
-      boxShadow: '0 0 15px rgba(34, 211, 238, 0.5)',
-    },
-    animated: true,
-    animatedStrokeWidth: 4,
-  }));
+  let nodes: Node[] = [...initialNodes];
+  const nodeIds = new Set(nodes.map((node) => node.id));
+
+  // Build edges with curved paths and color based on variant
+  let edges: Edge[] = flowchart.edges
+    .filter((edge) => nodeIds.has(edge.from_node) && nodeIds.has(edge.to_node))
+    .map((edge) => {
+    const sourceNode = nodes.find((n) => n.id === edge.from_node);
+    const targetNode = nodes.find((n) => n.id === edge.to_node);
+    let stroke = 'rgba(100, 116, 139, 0.9)';
+    if (sourceNode?.type === 'process' && sourceNode.data?.variant === 'recursive') stroke = 'rgba(239, 68, 68, 0.95)';
+    if (targetNode?.type === 'process' && targetNode.data?.variant === 'base') stroke = 'rgba(245, 158, 11, 0.95)';
+    return {
+      id: `${edge.from_node}-${edge.to_node}`,
+      source: edge.from_node,
+      target: edge.to_node,
+      label: edge.label || '',
+      type: 'smoothstep',
+      markerEnd: { type: MarkerType.ArrowClosed, color: stroke, width: 18, height: 18 },
+      style: { stroke, strokeWidth: 3, strokeLinejoin: 'round', strokeLinecap: 'round' },
+      labelStyle: { fill: '#94a3b8', fontWeight: 700, fontSize: '12px', backgroundColor: 'rgba(15, 23, 42, 0.8)', padding: '4px 8px', borderRadius: '8px', border: '1px solid rgba(148, 163, 184, 0.4)' },
+      animated: true,
+    } as Edge;
+  });
+
+  // Augment recursion: split recursive return into two sub-calls
+  const recursiveNodes = nodes.filter((n) => n.type === 'process' && n.data?.variant === 'recursive');
+  recursiveNodes.forEach((rec) => {
+    const leftId = `${rec.id}_sub_1`;
+    const rightId = `${rec.id}_sub_2`;
+    const leftNode: Node = {
+      id: leftId,
+      type: 'process',
+      data: { label: 'fib(n-1)', complexity_score: rec.data?.complexity_score || 1, variant: 'recursive', tooltip: 'Breaks the problem into subproblems' },
+      position: { x: 0, y: 0 },
+      sourcePosition: Position.Bottom,
+      targetPosition: Position.Top,
+    };
+    const rightNode: Node = {
+      id: rightId,
+      type: 'process',
+      data: { label: 'fib(n-2)', complexity_score: rec.data?.complexity_score || 1, variant: 'recursive', tooltip: 'Breaks the problem into subproblems' },
+      position: { x: 0, y: 0 },
+      sourcePosition: Position.Bottom,
+      targetPosition: Position.Top,
+    };
+    nodes.push(leftNode, rightNode);
+    nodeIds.add(leftId);
+    nodeIds.add(rightId);
+
+    // Redirect outgoing edges from recursive node to both sub-calls
+    const outgoing = edges.filter((e) => e.source === rec.id);
+    // Remove original outgoing edges from recursive node
+    edges = edges.filter((e) => e.source !== rec.id);
+    outgoing.forEach((e) => {
+      edges.push({ ...e, id: `${leftId}-${e.target}`, source: leftId });
+      edges.push({ ...e, id: `${rightId}-${e.target}`, source: rightId });
+    });
+
+    // Add edges from recursive node to its two sub-calls for clear branching
+    edges.push({
+      id: `${rec.id}-${leftId}`,
+      source: rec.id,
+      target: leftId,
+      type: 'smoothstep',
+      markerEnd: { type: MarkerType.ArrowClosed, color: 'rgba(239, 68, 68, 0.95)', width: 18, height: 18 },
+      style: { stroke: 'rgba(239, 68, 68, 0.95)', strokeWidth: 3 },
+      animated: true,
+    } as Edge);
+    edges.push({
+      id: `${rec.id}-${rightId}`,
+      source: rec.id,
+      target: rightId,
+      type: 'smoothstep',
+      markerEnd: { type: MarkerType.ArrowClosed, color: 'rgba(239, 68, 68, 0.95)', width: 18, height: 18 },
+      style: { stroke: 'rgba(239, 68, 68, 0.95)', strokeWidth: 3 },
+      animated: true,
+    } as Edge);
+  });
 
   nodes.forEach((node) => {
-    // Set different sizes based on node type - larger for better visibility
     if (node.type === 'diamond') {
-      g.setNode(node.id, { width: 150, height: 150 });
+      g.setNode(node.id, { width: 140, height: 140 });
     } else if (node.type === 'terminal') {
-      g.setNode(node.id, { width: 190, height: 80 });
+      g.setNode(node.id, { width: 180, height: 72 });
+    } else if (node.data?.label === 'fib(n-1)' || node.data?.label === 'fib(n-2)') {
+      g.setNode(node.id, { width: 150, height: 70 });
     } else {
       g.setNode(node.id, { width: 200, height: 90 });
     }
   });
 
   edges.forEach((edge) => {
-    g.setEdge(edge.source, edge.target);
+    if (nodeIds.has(edge.source) && nodeIds.has(edge.target)) {
+      g.setEdge(edge.source, edge.target);
+    }
   });
 
-  dagre.layout(g);
+  try {
+    dagre.layout(g);
+  } catch (error) {
+    console.error('⚠️ Dagre layout failed, falling back to simple layout:', error);
+    return {
+      nodes: nodes.map((node, index) => ({
+        ...node,
+        position: { x: (index % 2) * 250, y: Math.floor(index / 2) * 160 },
+      })),
+      edges,
+    };
+  }
 
-  nodes.forEach((node) => {
+  nodes.forEach((node, index) => {
     const nodeWithPosition = g.node(node.id);
-    let offsetX = 75;
-    let offsetY = 40;
-    
+    if (!nodeWithPosition) {
+      node.position = { x: (index % 2) * 250, y: Math.floor(index / 2) * 160 };
+      return;
+    }
+    let offsetX = 70;
+    let offsetY = 35;
     if (node.type === 'diamond') {
-      offsetX = 75;
-      offsetY = 75;
+      offsetX = 70;
+      offsetY = 70;
     } else if (node.type === 'terminal') {
-      offsetX = 95;
-      offsetY = 40;
+      offsetX = 90;
+      offsetY = 36;
+    } else if (node.data?.label === 'fib(n-1)' || node.data?.label === 'fib(n-2)') {
+      offsetX = 75;
+      offsetY = 35;
     } else {
       offsetX = 100;
       offsetY = 45;
     }
-    
-    node.position = {
-      x: nodeWithPosition.x - offsetX,
-      y: nodeWithPosition.y - offsetY,
-    };
+    node.position = { x: nodeWithPosition.x - offsetX, y: nodeWithPosition.y - offsetY };
   });
 
   return { nodes, edges };
@@ -348,12 +295,9 @@ export default function FlowchartVisualizer({ flowchart, explanation }: Flowchar
   }, [flowchart]);
 
   const defaultEdgeOptions = {
-    type: ConnectionLineType.Step,
+    type: ConnectionLineType.SmoothStep,
     animated: true,
-    style: {
-      stroke: 'rgba(34, 211, 238, 0.95)',
-      strokeWidth: 5,
-    },
+    style: { stroke: 'rgba(148, 163, 184, 0.9)', strokeWidth: 3 },
   };
 
   if (!flowchart) {
@@ -382,20 +326,22 @@ export default function FlowchartVisualizer({ flowchart, explanation }: Flowchar
             edges={edges}
             nodeTypes={nodeTypes}
             fitView
-            fitViewOptions={{ padding: 0.4, maxZoom: 2, minZoom: 0.4 }}
+            fitViewOptions={{ padding: 0.3, maxZoom: 2, minZoom: 0.5 }}
             className="bg-transparent"
             nodesDraggable={false}
             nodesConnectable={false}
             elementsSelectable={false}
-            panOnScroll={false}
-            zoomOnScroll={false}
+            panOnScroll={true}
+            zoomOnScroll={true}
+            zoomOnPinch={true}
             preventScrolling={true}
+            panOnDrag={false}
             defaultViewport={{ x: 0, y: 0, zoom: 1 }}
             defaultEdgeOptions={defaultEdgeOptions}
-            connectionLineType={ConnectionLineType.Step}
+            connectionLineType={ConnectionLineType.SmoothStep}
             connectionLineStyle={{
-              stroke: 'rgba(34, 211, 238, 0.7)',
-              strokeWidth: 4,
+              stroke: 'rgba(148, 163, 184, 0.7)',
+              strokeWidth: 3,
             }}
           >
             <Background 
@@ -405,36 +351,25 @@ export default function FlowchartVisualizer({ flowchart, explanation }: Flowchar
               style={{ opacity: 0.4 }}
             />
             <Controls 
-              className="bg-slate-900/98 border-cyan-500/50 backdrop-blur-lg shadow-2xl"
+              className="bg-slate-900/90 border border-[#33415599] backdrop-blur-md"
               style={{
-                boxShadow: `
-                  0 8px 32px rgba(34, 211, 238, 0.4),
-                  0 0 20px rgba(34, 211, 238, 0.3)
-                `,
-                borderRadius: '12px',
+                boxShadow: '0 6px 14px rgba(0,0,0,0.25)',
+                borderRadius: '10px',
               }}
               showInteractive={false}
             />
             <MiniMap
-              className="bg-slate-900/98 border-cyan-500/50 backdrop-blur-lg"
+              className="bg-slate-900/90 border border-[#33415599] backdrop-blur-md"
               style={{
-                boxShadow: `
-                  0 8px 32px rgba(34, 211, 238, 0.4),
-                  0 0 20px rgba(34, 211, 238, 0.3)
-                `,
-                borderRadius: '12px',
+                boxShadow: '0 6px 14px rgba(0,0,0,0.25)',
+                borderRadius: '10px',
               }}
               nodeColor={(node) => {
-                if (node.type === 'terminal') {
-                  const isStart = node.data?.type === 'start';
-                  return isStart ? '#a855f7' : '#f87171';
-                }
-                if (node.type === 'diamond') return '#22d3ee';
-                // Process nodes - check complexity
-                const complexity = node.data?.complexity_score || 0;
-                if (complexity > 5) return '#f87171';
-                if (complexity > 3) return '#a855f7';
-                return '#22d3ee';
+                if (node.type === 'terminal') return '#22c55e';
+                if (node.type === 'diamond') return '#3b82f6';
+                if (node.data?.variant === 'base') return '#f59e0b';
+                if (node.data?.variant === 'recursive') return '#ef4444';
+                return '#64748b';
               }}
               maskColor="rgba(0, 0, 0, 0.8)"
               pannable={true}
@@ -457,4 +392,3 @@ export default function FlowchartVisualizer({ flowchart, explanation }: Flowchar
     </div>
   );
 }
-

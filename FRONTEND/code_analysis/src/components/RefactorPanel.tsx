@@ -28,6 +28,16 @@ const severityConfig: Record<Severity, { color: string; icon: React.ReactNode; b
 export default function RefactorPanel({ refactor }: RefactorPanelProps) {
   const [copied, setCopied] = useState(false);
 
+  const detectLanguage = (codeSample: string): string => {
+    const snippet = codeSample.slice(0, 500).toLowerCase();
+    if (/def\s+\w+\s*\(/.test(codeSample) || /import\s+\w+/.test(snippet) && snippet.includes('self')) return 'Python';
+    if (/function\s+\w+\s*\(/.test(codeSample) || /const\s+\w+\s*=\s*\(/.test(codeSample) || snippet.includes('console.log')) return 'JavaScript';
+    if (/class\s+\w+\s*{/.test(codeSample) && snippet.includes('public')) return 'Java';
+    if (/#include\s+</.test(codeSample) || snippet.includes('std::')) return 'C++';
+    if (/package\s+\w+;/.test(codeSample) || /public\s+class/.test(codeSample)) return 'Java';
+    return 'Unknown';
+  };
+
   if (!refactor) {
     return (
       <div className="h-full flex items-center justify-center text-slate-400">
@@ -122,11 +132,14 @@ export default function RefactorPanel({ refactor }: RefactorPanelProps) {
           </div>
         </div>
 
-        {refactor.language_detected && (
-          <div className="text-xs text-slate-400">
-            Language detected: <span className="text-cyan-400">{refactor.language_detected}</span>
-          </div>
-        )}
+        <div className="text-xs text-slate-400">
+          Language detected:{' '}
+          <span className="text-cyan-400">
+            {refactor.language_detected && refactor.language_detected.toLowerCase() !== 'unknown'
+              ? refactor.language_detected
+              : detectLanguage(refactor.original_code || '')}
+          </span>
+        </div>
       </div>
     </div>
   );

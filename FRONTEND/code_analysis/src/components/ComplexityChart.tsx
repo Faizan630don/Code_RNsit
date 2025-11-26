@@ -13,7 +13,7 @@ interface ComplexityChartProps {
 export default function ComplexityChart({ complexity }: ComplexityChartProps) {
   if (!complexity) {
     return (
-      <div className="h-full flex items-center justify-center text-slate-400">
+      <div className="flex min-h-[420px] items-center justify-center rounded-2xl border border-white/10 bg-slate-950/60 text-slate-400">
         <div className="text-center">
           <p className="mb-2">No complexity data available</p>
           <p className="text-xs text-slate-500">Click "Analyze" to generate complexity analysis</p>
@@ -54,66 +54,66 @@ export default function ComplexityChart({ complexity }: ComplexityChartProps) {
     return processed;
   };
 
-  const timeData = processData(complexity.time_data || []).map((d) => ({ 
-    n: d.n, 
+  const timeData = processData(complexity.time_data || []).map((d) => ({
+    n: d.n,
     steps: d.steps,
-    type: 'Time' 
+    type: 'Time',
   }));
-  const spaceData = processData(complexity.space_data || []).map((d) => ({ 
-    n: d.n, 
+  const spaceData = processData(complexity.space_data || []).map((d) => ({
+    n: d.n,
     steps: d.steps,
-    type: 'Space' 
+    type: 'Space',
   }));
 
   return (
-    <div className="h-full flex flex-col gap-4 overflow-y-auto">
+    <div className="flex flex-col gap-6">
       {/* Complexity Summary */}
-      <div className="grid grid-cols-2 gap-4 flex-shrink-0">
-        <div className="p-4 bg-gradient-to-br from-slate-800/60 to-slate-800/40 rounded-lg border border-cyan-500/20 shadow-lg shadow-cyan-500/10">
-          <h3 className="text-cyan-400 font-semibold mb-2 flex items-center gap-2">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="rounded-2xl border border-cyan-500/30 bg-gradient-to-br from-slate-900/80 to-slate-900/40 p-5 shadow-lg shadow-cyan-500/10 transition-all duration-300 hover:border-cyan-300/90 hover:ring-2 hover:ring-cyan-400/70 hover:shadow-[0_55px_130px_rgba(6,182,212,0.45)]">
+          <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold text-cyan-300">
             <span>⏱️</span>
             <span>Time Complexity</span>
           </h3>
-          <p className="text-3xl font-bold text-white mb-2 bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
+          <p className="mb-2 bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-3xl font-bold text-transparent">
             {complexity.time_complexity || 'Unknown'}
           </p>
-          <p className="text-xs text-slate-400 leading-relaxed">
+          <p className="text-xs leading-relaxed text-slate-300">
             {complexity.time_explanation || 'No explanation available'}
           </p>
         </div>
-        <div className="p-4 bg-gradient-to-br from-slate-800/60 to-slate-800/40 rounded-lg border border-green-500/20 shadow-lg shadow-green-500/10">
-          <h3 className="text-green-400 font-semibold mb-2 flex items-center gap-2">
+        <div className="rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-slate-900/80 to-slate-900/40 p-5 shadow-lg shadow-emerald-500/10 transition-all duration-300 hover:border-emerald-300/90 hover:ring-2 hover:ring-emerald-400/70 hover:shadow-[0_55px_130px_rgba(16,185,129,0.45)]">
+          <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold text-emerald-300">
             <span>💾</span>
             <span>Space Complexity</span>
           </h3>
-          <p className="text-3xl font-bold text-white mb-2 bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
+          <p className="mb-2 bg-gradient-to-r from-emerald-400 to-green-400 bg-clip-text text-3xl font-bold text-transparent">
             {complexity.space_complexity || 'Unknown'}
           </p>
-          <p className="text-xs text-slate-400 leading-relaxed">
+          <p className="text-xs leading-relaxed text-slate-300">
             {complexity.space_explanation || 'No explanation available'}
           </p>
         </div>
       </div>
 
       {/* Two Separate Charts with Glowing Lines */}
-      <div className="flex-1 grid grid-cols-2 gap-4 overflow-hidden">
+      <div className="grid gap-4 md:grid-cols-2">
         {/* Time Complexity Chart with Glowing Cyan Line */}
-        <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/40 rounded-lg border border-cyan-500/20 p-5 flex flex-col overflow-hidden shadow-xl shadow-cyan-500/10">
-          <div className="flex items-center justify-between mb-4 flex-shrink-0">
-            <h3 className="text-lg font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent flex items-center gap-2">
+        <div className="rounded-2xl border border-cyan-500/30 bg-gradient-to-br from-slate-900/70 to-slate-950/60 p-5 shadow-xl shadow-cyan-500/10 transition-all duration-300 hover:border-cyan-300/90 hover:ring-2 hover:ring-cyan-400/70 hover:shadow-[0_65px_150px_rgba(6,182,212,0.5)]">
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="flex items-center gap-2 text-lg font-bold text-cyan-100">
               <span>⏱️</span>
               <span>Time Complexity</span>
             </h3>
-            <span className="text-xs text-slate-400 bg-slate-700/50 px-2 py-1 rounded">
+            <span className="rounded-full border border-white/10 px-2 py-0.5 text-xs text-slate-400">
               n≤{MAX_N_VALUE}
             </span>
           </div>
           {timeData.length === 0 ? (
-            <div className="flex-1 flex items-center justify-center text-slate-500">
+            <div className="flex h-64 items-center justify-center text-slate-500">
               <p className="text-sm">No data available</p>
             </div>
           ) : (
-            <div className="flex-1 min-h-0">
+            <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart 
                   data={timeData} 
@@ -213,22 +213,22 @@ export default function ComplexityChart({ complexity }: ComplexityChartProps) {
         </div>
 
         {/* Space Complexity Chart with Glowing Green Line */}
-        <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/40 rounded-lg border border-green-500/20 p-5 flex flex-col overflow-hidden shadow-xl shadow-green-500/10">
-          <div className="flex items-center justify-between mb-4 flex-shrink-0">
-            <h3 className="text-lg font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent flex items-center gap-2">
+        <div className="rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-slate-900/70 to-slate-950/60 p-5 shadow-xl shadow-emerald-500/10 transition-all duration-300 hover:border-emerald-300/90 hover:ring-2 hover:ring-emerald-400/70 hover:shadow-[0_65px_150px_rgba(16,185,129,0.5)]">
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="flex items-center gap-2 text-lg font-bold text-emerald-100">
               <span>💾</span>
               <span>Space Complexity</span>
             </h3>
-            <span className="text-xs text-slate-400 bg-slate-700/50 px-2 py-1 rounded">
+            <span className="rounded-full border border-white/10 px-2 py-0.5 text-xs text-slate-400">
               n≤{MAX_N_VALUE}
             </span>
           </div>
           {spaceData.length === 0 ? (
-            <div className="flex-1 flex items-center justify-center text-slate-500">
+            <div className="flex h-64 items-center justify-center text-slate-500">
               <p className="text-sm">No data available</p>
             </div>
           ) : (
-            <div className="flex-1 min-h-0">
+            <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart 
                   data={spaceData} 
