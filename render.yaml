@@ -11,13 +11,13 @@ services:
       - key: GROQ_API_KEY
         sync: false
       - key: CORS_ALLOW_ORIGINS
-        value: https://code-analysis-frontend.onrender.com,https://code-analysis-frontend.onrender.com/*
+        value: "*"
 
   - name: code-analysis-frontend
-    type: static
+    type: static_site
     rootDirectory: FRONTEND/code_analysis
     buildCommand: npm install && npm run build
-    staticPublishPath: dist
+    publishPath: dist
     envVars:
       - key: VITE_API_URL
         value: https://code-analysis-backend.onrender.com
