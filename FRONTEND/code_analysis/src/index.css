@@ -1,0 +1,142 @@
+@import "tailwindcss";
+
+@layer base {
+  * {
+    border-color: rgb(51 65 85);
+  }
+  
+  body {
+    background-color: rgb(15 23 42);
+    color: rgb(241 245 249);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+}
+
+/* Custom scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background-color: rgba(30, 41, 59, 0.5);
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(6, 182, 212, 0.4), rgba(6, 182, 212, 0.6));
+  border-radius: 10px;
+  border: 1px solid rgba(6, 182, 212, 0.2);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, rgba(6, 182, 212, 0.6), rgba(6, 182, 212, 0.8));
+}
+
+/* ReactFlow Custom Styles - Stunning Neon Effects */
+.react-flow__node {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.react-flow__node:hover {
+  transform: scale(1.08) !important;
+  z-index: 10 !important;
+  filter: brightness(1.2) !important;
+}
+
+.react-flow__edge {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.react-flow__edge:hover {
+  stroke-width: 5 !important;
+  filter: 
+    drop-shadow(0 0 10px rgba(34, 211, 238, 1))
+    drop-shadow(0 0 20px rgba(34, 211, 238, 0.9))
+    drop-shadow(0 0 30px rgba(34, 211, 238, 0.7)) !important;
+}
+
+.react-flow__edge-path {
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: url(#glow-filter);
+}
+
+.react-flow__arrowhead {
+  filter: 
+    drop-shadow(0 0 6px rgba(34, 211, 238, 1))
+    drop-shadow(0 0 12px rgba(34, 211, 238, 0.8));
+}
+
+.react-flow__node-diamond {
+  background: transparent !important;
+  border: none !important;
+}
+
+.react-flow__node-diamond .diamond-node {
+  width: 120px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: rotate(45deg);
+  position: relative;
+}
+
+/* Animated edge glow and pulse */
+@keyframes edgeGlow {
+  0%, 100% {
+    opacity: 0.7;
+    filter: drop-shadow(0 0 6px rgba(34, 211, 238, 0.8));
+  }
+  50% {
+    opacity: 1;
+    filter: drop-shadow(0 0 12px rgba(34, 211, 238, 1));
+  }
+}
+
+@keyframes nodePulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 12px currentColor);
+  }
+  50% {
+    filter: drop-shadow(0 0 20px currentColor) drop-shadow(0 0 30px currentColor);
+  }
+}
+
+.react-flow__edge.selected .react-flow__edge-path {
+  animation: edgeGlow 2s ease-in-out infinite;
+}
+
+.react-flow__node:hover .process-node,
+.react-flow__node:hover .terminal-node {
+  animation: nodePulse 1.5s ease-in-out infinite;
+}
+
+/* Shimmer effect for terminal nodes */
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+.shimmer-effect {
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+/* Enhanced background pattern */
+.react-flow__background {
+  background-image: 
+    radial-gradient(circle at 1px 1px, rgba(34, 211, 238, 0.15) 1px, transparent 0);
+  background-size: 24px 24px;
+}
+
+/* Monaco Editor Dark Theme Override */
+.monaco-editor {
+  --vscode-editor-background: #0f172a !important;
+}
