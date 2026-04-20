@@ -1,11 +1,11 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import os
-from backend.services.groq_client import (
-    groq_generate_explanation, 
-    groq_generate_docstring, 
-    groq_refactor_code,
-    groq_analyze_complexity  # Import the new function
+from backend.services.gemini_client import (
+    gemini_generate_explanation, 
+    gemini_generate_docstring, 
+    gemini_refactor_code,
+    gemini_analyze_complexity  # Import the new function
 )
 from backend.services.flowchart_builder import build_flowchart
 from backend.models.flowchart_models import (
@@ -35,13 +35,13 @@ async def ping():
 @app.post("/api/explain", response_model=FlowchartResponse)
 async def explain_code(req: ExplainRequest):
     try:
-        explanation = groq_generate_explanation(req.code, req.language)
+        explanation = gemini_generate_explanation(req.code, req.language)
         fallback = False
         # If explanation failed due to missing/invalid API key, continue with AST flowchart and a fallback message
         if isinstance(explanation, str) and (
             explanation.startswith("Error:") or
             "invalid_api_key" in explanation.lower() or
-            "GROQ_API_KEY" in explanation
+            "GEMINI_API_KEY" in explanation
         ):
             fallback = True
         flowchart = build_flowchart(req.code)
@@ -60,12 +60,12 @@ async def explain_code(req: ExplainRequest):
 @app.post("/api/docstring", response_model=DocstringResponse)
 async def generate_docstring(req: DocstringRequest):
     try:
-        docstring_text = groq_generate_docstring(req.code, req.style)
+        docstring_text = gemini_generate_docstring(req.code, req.style)
         # Graceful fallback for API key issues
         if isinstance(docstring_text, str) and (
             docstring_text.startswith("Error:") or
             "invalid_api_key" in docstring_text.lower() or
-            "GROQ_API_KEY" in docstring_text
+            "GEMINI_API_KEY" in docstring_text
         ):
             docstring_text = "Documentation unavailable due to API key configuration."
         return {"docstring": docstring_text}
@@ -77,9 +77,9 @@ async def generate_docstring(req: DocstringRequest):
 @app.post("/api/refactor", response_model=RefactorResponse)
 async def refactor_code(req: RefactorRequest):
     try:
-        analysis_result = groq_refactor_code(req.code)
+        analysis_result = gemini_refactor_code(req.code)
 
-        # If Groq returns an error (e.g., API key), provide a graceful fallback
+        # If Gemini returns an error (e.g., API key), provide a graceful fallback
         if isinstance(analysis_result, dict) and analysis_result.get("error"):
             analysis_result = {
                 "language_detected": "unknown",
@@ -104,7 +104,7 @@ async def analyze_complexity(req: ComplexityRequest):
     Returns Time/Space complexity analysis and data points for plotting graphs.
     """
     try:
-        result = groq_analyze_complexity(req.code)
+        result = gemini_analyze_complexity(req.code)
 
         # Graceful fallback for API key issues
         if isinstance(result, dict) and result.get("error"):

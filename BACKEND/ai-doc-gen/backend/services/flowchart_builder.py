@@ -2,7 +2,7 @@ import ast
 import re
 from typing import List, Optional, Dict
 from backend.models.flowchart_models import Node, Edge, Flowchart
-from backend.services.groq_client import groq_analyze_line_complexities
+from backend.services.gemini_client import gemini_analyze_line_complexities
 
 class BaseFlowchartBuilder:
     def __init__(self):
@@ -115,7 +115,7 @@ class RegexFlowchartBuilder(BaseFlowchartBuilder):
         prev_id = start_id
         
         # 1. Get Batch AI Scores
-        ai_complexity_map = groq_analyze_line_complexities(code)
+        ai_complexity_map = gemini_analyze_line_complexities(code)
         
         lines = code.split('\n')
         for line in lines:
