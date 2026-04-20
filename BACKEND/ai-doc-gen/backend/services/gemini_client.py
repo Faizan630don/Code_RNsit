@@ -22,8 +22,8 @@ def _get_gemini_response(prompt: str, json_mode: bool = False) -> str:
                 return json.dumps({"error": error_msg, "error_type": "missing_api_key"})
             return error_msg
         
-        # We use gemini-1.5-flash as the fast standard model context window
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        # We use gemini-2.5-flash as the fast standard model context window
+        model = genai.GenerativeModel('gemini-2.5-flash')
         
         generation_config = genai.types.GenerationConfig(
             temperature=0.1 if json_mode else 0.2,
