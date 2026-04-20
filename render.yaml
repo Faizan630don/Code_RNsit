@@ -5,11 +5,9 @@ services:
     rootDirectory: BACKEND/ai-doc-gen
     plan: free
     buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    startCommand: gunicorn -w 4 -k uvicorn.workers.UvicornWorker backend.main:app --bind 0.0.0.0:$PORT
     autoDeploy: true
     envVars:
-      - key: PYTHON_VERSION
-        value: 3.11.0
       - key: GEMINI_API_KEY
         sync: false
       - key: CORS_ALLOW_ORIGINS
@@ -21,7 +19,5 @@ services:
     buildCommand: npm install && npm run build
     publishPath: dist
     envVars:
-      - key: NODE_VERSION
-        value: "20"
       - key: VITE_API_URL
         value: https://code-analysis-backend.onrender.com
