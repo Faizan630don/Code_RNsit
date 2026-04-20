@@ -3,10 +3,17 @@ import json
 import google.generativeai as genai
 from dotenv import load_dotenv
 
-# Load .env
-load_dotenv()
+# Load .env relative to this file
+base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+env_path = os.path.join(os.path.dirname(base_dir), ".env")
+load_dotenv(env_path)
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+if not GEMINI_API_KEY:
+    # Fallback to local .env if not found in parent
+    load_dotenv()
+    GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 if not GEMINI_API_KEY:
     print("Warning: GEMINI_API_KEY not found in environment.")
@@ -17,13 +24,13 @@ def _get_gemini_response(prompt: str, json_mode: bool = False) -> str:
     """Helper to send requests to Gemini"""
     try:
         if not GEMINI_API_KEY:
-            error_msg = "GEMINI_API_KEY is not configured. Please set it in your .env file."
+            error_msg = "GEMINI_API_KEY is missing. Check your .env file."
             if json_mode:
                 return json.dumps({"error": error_msg, "error_type": "missing_api_key"})
-            return error_msg
+            return f"Error: {error_msg}"
         
-        # We use gemini-2.5-flash as the fast standard model context window
-        model = genai.GenerativeModel('gemini-2.5-flash')
+        # Using gemini-flash-latest for maximum compatibility
+        model = genai.GenerativeModel('gemini-flash-latest')
         
         generation_config = genai.types.GenerationConfig(
             temperature=0.1 if json_mode else 0.2,

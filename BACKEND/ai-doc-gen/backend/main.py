@@ -45,9 +45,10 @@ async def explain_code(req: ExplainRequest):
         ):
             fallback = True
         flowchart = build_flowchart(req.code)
+        error_detail = explanation if fallback and isinstance(explanation, str) and explanation.startswith("Error:") else ""
         return {
             "explanation": (
-                "Explanation unavailable due to API key configuration. Flowchart derived from AST analysis."
+                f"Explanation unavailable: {error_detail}. Flowchart derived from AST analysis."
                 if fallback else explanation
             ),
             "flowchart": flowchart
@@ -67,7 +68,8 @@ async def generate_docstring(req: DocstringRequest):
             "invalid_api_key" in docstring_text.lower() or
             "GEMINI_API_KEY" in docstring_text
         ):
-            docstring_text = "Documentation unavailable due to API key configuration."
+            error_detail = docstring_text if docstring_text.startswith("Error:") else "API key configuration issue"
+            docstring_text = f"Documentation unavailable: {error_detail}"
         return {"docstring": docstring_text}
     except HTTPException:
         raise
@@ -108,11 +110,12 @@ async def analyze_complexity(req: ComplexityRequest):
 
         # Graceful fallback for API key issues
         if isinstance(result, dict) and result.get("error"):
+            error_msg = result.get("error", "API key configuration issue")
             result = {
                 "time_complexity": "Unknown",
                 "space_complexity": "Unknown",
-                "time_explanation": "Complexity analysis unavailable due to API key configuration.",
-                "space_explanation": "Complexity analysis unavailable due to API key configuration.",
+                "time_explanation": f"Complexity analysis unavailable: {error_msg}",
+                "space_explanation": f"Complexity analysis unavailable: {error_msg}",
                 "time_data": [],
                 "space_data": [],
             }
